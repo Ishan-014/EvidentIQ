@@ -1,0 +1,120 @@
+{
+  "employees": [
+    {
+      "employee_id": "EMP001",
+      "name": "Alice Chen",
+      "department": "Engineering",
+      "competencies": [
+        {
+          "competency": "technical",
+          "latest_score": 80,
+          "previous_score": 75,
+          "trend": "stagnant",
+          "confidence": 0.65,
+          "evidence_count": 3
+        },
+        {
+          "competency": "communication",
+          "latest_score": 69,
+          "previous_score": 70,
+          "trend": "insufficient_evidence",
+          "confidence": 0.49,
+          "evidence_count": 3
+        },
+        {
+          "competency": "leadership",
+          "latest_score": 60,
+          "previous_score": null,
+          "trend": "insufficient_evidence",
+          "confidence": 0.0,
+          "evidence_count": 1
+        }
+      ]
+    },
+    {
+      "employee_id": "EMP002",
+      "name": "Bob Martinez",
+      "department": "Sales",
+      "competencies": [
+        {
+          "competency": "technical",
+          "latest_score": 48,
+          "previous_score": 52,
+          "trend": "stagnant",
+          "confidence": 0.61,
+          "evidence_count": 3
+        },
+        {
+          "competency": "communication",
+          "latest_score": 85,
+          "previous_score": 82,
+          "trend": "insufficient_evidence",
+          "confidence": 0.57,
+          "evidence_count": 3
+        },
+        {
+          "competency": "leadership",
+          "latest_score": 74,
+          "previous_score": 70,
+          "trend": "insufficient_evidence",
+          "confidence": 0.46,
+          "evidence_count": 2
+        }
+      ]
+    },
+    {
+      "employee_id": "EMP003",
+      "name": "Carol Singh",
+      "department": "Marketing",
+      "competencies": [
+        {
+          "competency": "technical",
+          "latest_score": 65,
+          "previous_score": 65,
+          "trend": "insufficient_evidence",
+          "confidence": 0.3,
+          "evidence_count": 2
+        },
+        {
+          "competency": "communication",
+          "latest_score": 77,
+          "previous_score": 79,
+          "trend": "insufficient_evidence",
+          "confidence": 0.53,
+          "evidence_count": 3
+        }
+      ]
+    },
+    {
+      "employee_id": "EMP004",
+      "name": "David Okonkwo",
+      "department": "Engineering",
+      "competencies": [
+        {
+          "competency": "technical",
+          "latest_score": 93,
+          "previous_score": 92,
+          "trend": "stagnant",
+          "confidence": 0.64,
+          "evidence_count": 4
+        },
+        {
+          "competency": "communication",
+          "latest_score": 70,
+          "previous_score": null,
+          "trend": "insufficient_evidence",
+          "confidence": 0.0,
+          "evidence_count": 1
+        },
+        {
+          "competency": "leadership",
+          "latest_score": 63,
+          "previous_score": 65,
+          "trend": "insufficient_evidence",
+          "confidence": 0.38,
+          "evidence_count": 2
+        }
+      ]
+    }
+  ]
+}
