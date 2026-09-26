@@ -5,7 +5,7 @@ Generates `scored_output.json` from raw employee data.
 ## Usage
 
 ```bash
-python data/generate_dataset.py
+python scoring/score_engine.py
 ```
 
 ## Output
