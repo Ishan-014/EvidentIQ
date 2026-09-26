@@ -1,0 +1,77 @@
+{
+  "company": "EvidentIQ Talent Intelligence",
+  "employees": [
+    {
+      "employee_id": "EMP001",
+      "name": "Alice Chen",
+      "department": "Engineering",
+      "summary": "Alice shows consistent technical growth with scores rising from 70 to 88 over six months, though her communication and leadership competencies have stagnated around 65-72 and 55-62 respectively. She would benefit from targeted communication coaching and stretch leadership assignments to round out her profile.",
+      "recommendations": [
+        "Enroll Alice in a structured communication skills workshop focused on cross-functional presentation to address her stagnant communication score (65\u201372 range).",
+        "Assign Alice as a technical lead on a small project to build leadership evidence \u2014 currently only 3 data points over 6 months.",
+        "Schedule monthly 1:1 check-ins with her manager to track progress on collaboration, which currently has insufficient evidence for reliable trend assessment."
+      ],
+      "evidence_ids": [
+        "manager_q2",
+        "peer_360",
+        "manager_q1"
+      ],
+      "generation_source": "fallback",
+      "model": null
+    },
+    {
+      "employee_id": "EMP002",
+      "name": "Bob Martinez",
+      "department": "Sales",
+      "summary": "Bob's communication skills are a clear strength (80\u219290, stagnant but high), while his technical competency is declining steadily (58\u219245 over 6 months). Immediate intervention is needed to arrest the technical decline before it affects his overall performance rating.",
+      "recommendations": [
+        "Pair Bob with a technical mentor or assign targeted e-learning modules to address his declining technical score (58\u219245).",
+        "Leverage Bob's strong communication skills by having him lead client-facing presentations, reinforcing confidence while buying time for technical upskilling.",
+        "Increase the frequency of evidence collection for leadership and collaboration (currently insufficient) \u2014 add a quarterly project-based assessment."
+      ],
+      "evidence_ids": [
+        "manager_q2",
+        "proj_gamma",
+        "peer_360"
+      ],
+      "generation_source": "fallback",
+      "model": null
+    },
+    {
+      "employee_id": "EMP003",
+      "name": "Carol Singh",
+      "department": "Marketing",
+      "summary": "Carol is a strong collaborator and communicator, with scores in the high 70s\u2013low 80s for both. Her technical competency is flat at 65 and leadership is underdeveloped at 50\u201353. Several competencies lack enough evidence for reliable assessment.",
+      "recommendations": [
+        "Create a leadership development plan for Carol \u2014 her leadership score (50\u201353) is the lowest across her profile with only 2 data points.",
+        "Assign Carol a cross-functional marketing-tech project to build both technical and adaptability evidence simultaneously.",
+        "Introduce quarterly 360-degree reviews to increase evidence density for collaboration and adaptability."
+      ],
+      "evidence_ids": [
+        "manager_q2",
+        "peer_360",
+        "manager_q1"
+      ],
+      "generation_source": "fallback",
+      "model": null
+    },
+    {
+      "employee_id": "EMP004",
+      "name": "David Okonkwo",
+      "department": "Engineering",
+      "summary": "David is a top technical performer (88\u219295) and strong collaborator, but his leadership scores are trending slightly downward (65\u219261) and communication data is sparse. His technical excellence is an asset but leadership development is becoming urgent.",
+      "recommendations": [
+        "Address David's declining leadership score (65\u219261) with a structured mentorship programme \u2014 assign him a formal mentee to build people-management experience.",
+        "Collect more communication evidence for David \u2014 currently only 3 data points across 6 months, making it impossible to assess trend.",
+        "Consider David for a senior technical role that includes team leadership responsibilities to build both leadership and communication evidence organically."
+      ],
+      "evidence_ids": [
+        "manager_q2",
+        "peer_360",
+        "manager_q1"
+      ],
+      "generation_source": "fallback",
+      "model": null
+    }
+  ]
+}

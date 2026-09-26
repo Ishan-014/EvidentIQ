@@ -1,0 +1,112 @@
+{
+  "employees": [
+    {
+      "employee_id": "EMP001",
+      "name": "Alice Chen",
+      "department": "Engineering",
+      "summary": "Alice shows consistent technical growth with scores rising from 70 to 88 over six months, though her communication and leadership competencies have stagnated around 65-72 and 55-62 respectively. She would benefit from targeted communication coaching and stretch leadership assignments to round out her profile.",
+      "recommendations": [
+        "Enroll Alice in a structured communication skills workshop focused on cross-functional presentation to address her stagnant communication score (65–72 range).",
+        "Assign Alice as a technical lead on a small project to build leadership evidence — currently only 3 data points over 6 months.",
+        "Schedule monthly 1:1 check-ins with her manager to track progress on collaboration, which currently has insufficient evidence for reliable trend assessment."
+      ],
+      "competency_notes": [
+        {"competency": "technical", "trend": "stagnant", "note": "Scores rising steadily (70→88) but delta per month is small — trajectory engine classifies as stagnant. Strong performer in this area."},
+        {"competency": "communication", "trend": "stagnant", "note": "Flat 65–72 range. No significant improvement observed."},
+        {"competency": "leadership", "trend": "stagnant", "note": "Low scores (55–62) with sparse evidence. Needs development."},
+        {"competency": "collaboration", "trend": "insufficient_evidence", "note": "Only 3 peer reviews. More data needed before trend can be assessed."},
+        {"competency": "adaptability", "trend": "insufficient_evidence", "note": "Only 2 data points. Gather additional evidence in Q3."}
+      ]
+    },
+    {
+      "employee_id": "EMP002",
+      "name": "Bob Martinez",
+      "department": "Sales",
+      "summary": "Bob's communication skills are a clear strength (80→90, stagnant but high), while his technical competency is declining steadily (58→45 over 6 months). Immediate intervention is needed to arrest the technical decline before it affects his overall performance rating.",
+      "recommendations": [
+        "Pair Bob with a technical mentor or assign targeted e-learning modules to address his declining technical score (58→45).",
+        "Leverage Bob's strong communication skills by having him lead client-facing presentations, reinforcing confidence while buying time for technical upskilling.",
+        "Increase the frequency of evidence collection for leadership and collaboration (currently insufficient) — add a quarterly project-based assessment."
+      ],
+      "competency_notes": [
+        {"competency": "technical", "trend": "stagnant", "note": "Scores declining (58→45) but confidence 0.72 — classified stagnant due to small per-step delta."},
+        {"competency": "communication", "trend": "stagnant", "note": "High and stable (80–90). A genuine strength."},
+        {"competency": "leadership", "trend": "insufficient_evidence", "note": "Only 3 data points. Needs more structured evidence."},
+        {"competency": "collaboration", "trend": "insufficient_evidence", "note": "Only 3 peer reviews. Increase cadence."},
+        {"competency": "adaptability", "trend": "insufficient_evidence", "note": "Only 2 data points."}
+      ]
+    },
+    {
+      "employee_id": "EMP003",
+      "name": "Carol Singh",
+      "department": "Marketing",
+      "summary": "Carol is a strong collaborator and communicator, with scores in the high 70s–low 80s for both. Her technical competency is flat at 65 and leadership is underdeveloped at 50–53. Several competencies lack enough evidence for reliable assessment.",
+      "recommendations": [
+        "Create a leadership development plan for Carol — her leadership score (50–53) is the lowest across her profile with only 2 data points.",
+        "Assign Carol a cross-functional marketing-tech project to build both technical and adaptability evidence simultaneously.",
+        "Introduce quarterly 360-degree reviews to increase evidence density for collaboration and adaptability."
+      ],
+      "competency_notes": [
+        {"competency": "technical", "trend": "stagnant", "note": "Flat at 65 across all months. No meaningful change."},
+        {"competency": "communication", "trend": "stagnant", "note": "Strong (77–79) and consistent."},
+        {"competency": "leadership", "trend": "insufficient_evidence", "note": "Only 2 data points. Cannot assess trend reliably."},
+        {"competency": "collaboration", "trend": "insufficient_evidence", "note": "3 peer reviews. More data needed."},
+        {"competency": "adaptability", "trend": "insufficient_evidence", "note": "Single data point. No trend possible."}
+      ]
+    },
+    {
+      "employee_id": "EMP004",
+      "name": "David Okonkwo",
+      "department": "Engineering",
+      "summary": "David is a top technical performer (88→95) and strong collaborator, but his leadership scores are trending slightly downward (65→61) and communication data is sparse. His technical excellence is an asset but leadership development is becoming urgent.",
+      "recommendations": [
+        "Address David's declining leadership score (65→61) with a structured mentorship programme — assign him a formal mentee to build people-management experience.",
+        "Collect more communication evidence for David — currently only 3 data points across 6 months, making it impossible to assess trend.",
+        "Consider David for a senior technical role that includes team leadership responsibilities to build both leadership and communication evidence organically."
+      ],
+      "competency_notes": [
+        {"competency": "technical", "trend": "stagnant", "note": "Consistently high (88–95). Top performer in the cohort."},
+        {"competency": "communication", "trend": "insufficient_evidence", "note": "Only 3 data points. Needs more evidence."},
+        {"competency": "leadership", "trend": "insufficient_evidence", "note": "Slight decline (65→61) but insufficient confidence for trend classification."},
+        {"competency": "collaboration", "trend": "insufficient_evidence", "note": "3 peer reviews — increase cadence."},
+        {"competency": "adaptability", "trend": "insufficient_evidence", "note": "2 data points. Gather more evidence."}
+      ]
+    },
+    {
+      "employee_id": "EMP005",
+      "name": "Eva Rosenberg",
+      "department": "HR",
+      "summary": "Eva is the strongest all-round performer in the cohort, with excellent communication (88–95) and leadership (78–87) scores both trending positively. Her technical competency is low (55–60) but improving, and collaboration scores are high. A high-potential employee.",
+      "recommendations": [
+        "Invest in Eva's technical development with targeted training — her score (55–60) is below average for the cohort despite slow improvement.",
+        "Consider Eva for a team lead or people-manager role — her leadership trajectory (78→87) and communication strength make her well-suited.",
+        "Increase adaptability evidence collection — only 2 data points currently, which limits trend confidence."
+      ],
+      "competency_notes": [
+        {"competency": "technical", "trend": "insufficient_evidence", "note": "Low (55–60) with sparse evidence. Prioritise data collection and upskilling."},
+        {"competency": "communication", "trend": "stagnant", "note": "High (88–95) and consistent. Clear strength."},
+        {"competency": "leadership", "trend": "stagnant", "note": "Strong and improving (78–87). Excellent trajectory."},
+        {"competency": "collaboration", "trend": "insufficient_evidence", "note": "3 data points. More evidence needed for reliable trend."},
+        {"competency": "adaptability", "trend": "insufficient_evidence", "note": "2 data points. Insufficient for trend."}
+      ]
+    },
+    {
+      "employee_id": "EMP006",
+      "name": "Frank Nguyen",
+      "department": "Sales",
+      "summary": "Frank shows steady improvement across technical (62→70), communication (74→80), and leadership (60→70) competencies — all trending positively with stagnant classification due to small per-step deltas. He is a consistently improving employee who needs more evidence collected to confirm the upward trajectory.",
+      "recommendations": [
+        "Recognise Frank's consistent improvement across all three main competencies and set stretch targets for 2026 H2 to accelerate growth.",
+        "Increase evidence density for collaboration and adaptability — currently insufficient for trend assessment.",
+        "Pair Frank with a senior Sales mentor to accelerate his leadership development, which shows the most room for growth (60→70)."
+      ],
+      "competency_notes": [
+        {"competency": "technical", "trend": "stagnant", "note": "Improving (62→70) but classified stagnant due to small monthly deltas."},
+        {"competency": "communication", "trend": "stagnant", "note": "Steadily improving (74→80)."},
+        {"competency": "leadership", "trend": "stagnant", "note": "Clear upward trend (60→70) over 3 data points."},
+        {"competency": "collaboration", "trend": "insufficient_evidence", "note": "3 peer reviews. More data needed."},
+        {"competency": "adaptability", "trend": "insufficient_evidence", "note": "2 data points. Insufficient for trend."}
+      ]
+    }
+  ]
+}

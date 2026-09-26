@@ -1,0 +1,10 @@
+Employee: {name} ({department})
+
+Competency Assessment:
+{competency_summary}
+
+Please provide:
+1. A brief overall summary (2-3 sentences)
+2. Key strengths and areas needing development
+3. 2-3 specific coaching recommendations
+4. Notes on any competencies with insufficient evidence
