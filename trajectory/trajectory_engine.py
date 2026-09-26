@@ -8,6 +8,7 @@ from typing import Optional
 # Default confidence threshold — can be overridden via env var.
 DEFAULT_THRESHOLD = float(os.environ.get("TRAJECTORY_CONFIDENCE_THRESHOLD", "0.6"))
 STAGNANT_THRESHOLD = 5  # ±5 points considered "stagnant"
+MIN_EVIDENCE_FOR_TREND = 2  # Minimum evidence items to assess a trend
 
 
 def load_scored_data(path: str = "scored_output.json") -> dict:
@@ -21,7 +22,8 @@ def _resolve_path(p: str) -> str:
     """Look in common locations so the engine works from either repo root or
     from the trajectory/ directory. Absolute paths that do not exist are
     rejected immediately rather than falling back to other candidates."""
-    if Path(p).is_absolute() and not Path(p).exists():
+    p_path = Path(p)
+    if (p_path.is_absolute() or p.startswith("/") or p.startswith("\\")) and not p_path.exists():
         raise FileNotFoundError(f"Could not find scored data at: {p}")
     candidates = [p, Path("..") / p, Path("data") / "raw_dataset.json", Path("..") / "data" / "raw_dataset.json"]
     for c in candidates:
@@ -38,21 +40,52 @@ def _count_evidence(monthly_entry: dict) -> int:
     return 0
 
 
-def _compute_confidence(previous_score: float, latest_score: float, total_evidence: int) -> float:
-    """Compute confidence in the trend assessment.
+def _extract_evidence_sources(monthly_scores: list) -> list:
+    """Extract unique evidence source identifiers from monthly scores."""
+    sources = set()
+    for entry in monthly_scores:
+        for ev in entry.get("evidence", []):
+            if "source" in ev:
+                sources.add(ev["source"])
+    return list(sources)
 
-    - Base confidence from evidence volume: more evidence → higher confidence.
-      Each piece of evidence contributes up to 0.15, capped at 0.6.
-    - Magnitude factor: larger absolute delta between scores → more confidence.
-      Adds up to 0.4 for a delta ≥ 10, scaled linearly.
-    - Total capped at 1.0.
+
+def _extract_evidence_refs(monthly_scores: list) -> list:
+    """Extract evidence source references for output (e.g., 'PROJ-001', 'manager_q1')."""
+    refs = []
+    for entry in monthly_scores:
+        for ev in entry.get("evidence", []):
+            if "source" in ev:
+                refs.append(ev["source"])
+    return list(dict.fromkeys(refs))  # Deduplicate while preserving order
+
+
+def _compute_confidence(
+    total_evidence: int,
+    unique_sources: int,
+    num_cycles: int,
+    threshold: float = DEFAULT_THRESHOLD,
+) -> float:
+    """Compute confidence in the trend assessment based on evidence quantity,
+    source diversity, and longitudinal data.
+
+    Confidence components:
+    - Evidence quantity: each evidence item adds up to 0.25, capped at 0.5
+    - Source diversity: each unique source type adds up to 0.25, capped at 0.5
+    - Cycle count: more cycles = more confidence (up to 3 cycles = full)
+    - Total capped at 1.0
     """
-    evidence_confidence = min(0.15 * total_evidence, 0.6)
+    # Evidence quantity component (max 0.5)
+    evidence_confidence = min(0.25 * total_evidence, 0.5)
 
-    delta = abs(latest_score - previous_score)
-    magnitude_confidence = min(delta / 10.0, 1.0) * 0.4
+    # Source diversity component (max 0.5) - reward multiple source types
+    source_confidence = min(0.25 * unique_sources, 0.5)
 
-    return min(evidence_confidence + magnitude_confidence, 1.0)
+    # Cycle count component - more cycles = more confidence in trend
+    cycle_confidence = min(0.1 * num_cycles, 0.3)
+
+    total = evidence_confidence + source_confidence + cycle_confidence
+    return min(total, 1.0)
 
 
 def classify_trend(previous_score: float, latest_score: float, confidence: float, threshold: float) -> str:
@@ -72,12 +105,29 @@ def classify_trend(previous_score: float, latest_score: float, confidence: float
         return "declining"
 
 
+def _compute_cycle_delta(cycles: list) -> list:
+    """Compute score changes between consecutive cycles."""
+    if len(cycles) < 2:
+        return []
+
+    deltas = []
+    for i in range(1, len(cycles)):
+        prev_score = cycles[i - 1]["score"]
+        curr_score = cycles[i]["score"]
+        deltas.append({
+            "from_cycle": cycles[i - 1]["cycle"],
+            "to_cycle": cycles[i]["cycle"],
+            "delta": curr_score - prev_score,
+        })
+    return deltas
+
+
 def assess_competency(
     competency_name: str,
     monthly_scores: list,
     threshold: float = DEFAULT_THRESHOLD,
 ) -> dict:
-    """Assess a single competency for an employee."""
+    """Assess a single competency for an employee with full longitudinal trajectory."""
     if not monthly_scores or len(monthly_scores) < 2:
         total_evidence = sum(_count_evidence(entry) for entry in monthly_scores)
         return {
@@ -87,17 +137,40 @@ def assess_competency(
             "trend": "insufficient_evidence",
             "confidence": 0.0,
             "evidence_count": total_evidence,
+            "cycles": _build_cycles_array(monthly_scores),
+            "cycle_deltas": [],
+            "delta": None,
+            "insufficient_evidence": True,
+            "evidence_used": _extract_evidence_refs(monthly_scores),
+            "scores": [entry["score"] for entry in monthly_scores] if monthly_scores else [],
         }
 
-    # Sort by month ascending to ensure correct ordering
+    # Sort by month ascending for correct chronological ordering
     sorted_scores = sorted(monthly_scores, key=lambda e: e["month"])
+
+    # Build full longitudinal data
+    cycles = _build_cycles_array(sorted_scores)
+    cycle_deltas = _compute_cycle_delta(cycles)
+    scores_array = [entry["score"] for entry in sorted_scores]
+
+    # Calculate trend from first to last
+    first_score = sorted_scores[0]["score"]
+    last_score = sorted_scores[-1]["score"]
+    delta = last_score - first_score
 
     previous = sorted_scores[-2]["score"]
     latest = sorted_scores[-1]["score"]
 
+    # Compute confidence based on evidence, sources, and cycles (NOT magnitude)
     total_evidence = sum(_count_evidence(entry) for entry in sorted_scores)
-    confidence = _compute_confidence(previous, latest, total_evidence)
+    unique_sources = len(_extract_evidence_sources(sorted_scores))
+    num_cycles = len(sorted_scores)
+
+    confidence = _compute_confidence(total_evidence, unique_sources, num_cycles, threshold)
     trend = classify_trend(previous, latest, confidence, threshold)
+
+    # Determine if we have insufficient evidence
+    insufficient = trend == "insufficient_evidence" or total_evidence < MIN_EVIDENCE_FOR_TREND
 
     return {
         "competency": competency_name,
@@ -106,7 +179,25 @@ def assess_competency(
         "trend": trend,
         "confidence": round(confidence, 4),
         "evidence_count": total_evidence,
+        "cycles": cycles,
+        "cycle_deltas": cycle_deltas,
+        "delta": delta,
+        "insufficient_evidence": insufficient,
+        "evidence_used": _extract_evidence_refs(sorted_scores),
+        "scores": scores_array,
     }
+
+
+def _build_cycles_array(monthly_scores: list) -> list:
+    """Convert monthly scores to cycle format with month references and preserved detailed evidence."""
+    cycles = []
+    for entry in monthly_scores:
+        cycles.append({
+            "cycle": entry.get("month", ""),
+            "score": entry.get("score"),
+            "evidence": entry.get("evidence", []),
+        })
+    return cycles
 
 
 def compute_trajectory(scored_data: dict, threshold: float = DEFAULT_THRESHOLD) -> dict:
