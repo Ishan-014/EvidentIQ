@@ -61,6 +61,7 @@ export default function SplineScene({
     initSpline();
 
     return () => {
+      // Ignore late load results and release the WebGL runtime when the scene changes or unmounts.
       isMounted = false;
       if (splineApp && typeof splineApp.dispose === 'function') {
         splineApp.dispose();

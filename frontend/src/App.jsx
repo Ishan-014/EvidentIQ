@@ -17,6 +17,7 @@ export default function App() {
   const [workspaceTab, setWorkspaceTab] = useState('overview');
 
   const handleOpenWorkspace = (target = 'EMP001', tab = 'overview') => {
+    // Feature buttons pass a tab name as the first argument; employee selectors pass an ID.
     if (target === 'what-if' || target === 'ai-coach' || target === 'overview') {
       setWorkspaceTab(target);
       setWorkspaceTarget('EMP001');
