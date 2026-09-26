@@ -180,10 +180,13 @@ for emp_id, name, role, dept, story in EMPLOYEES:
 
 scored_output = {"company": COMPANY, "employees": employees_scored}
 
-with open("scored_output.json", "w") as f:
+with open("scored_output.json", "w", encoding="utf-8") as f:
     json.dump(scored_output, f, indent=2)
 
-print(f"[OK] scored_output.json - {len(employees_scored)} employees, {len(COMPETENCIES)} competencies, {len(MONTHS)} months each")
+with open("data/raw_dataset.json", "w", encoding="utf-8") as f:
+    json.dump(scored_output, f, indent=2)
+
+print(f"[OK] data/raw_dataset.json & scored_output.json - {len(employees_scored)} employees, {len(COMPETENCIES)} competencies, {len(MONTHS)} months each")
 
 # ── Quick trajectory computation (mirrors trajectory_engine.py logic) ─────────
 

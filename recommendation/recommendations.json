@@ -3,7 +3,7 @@
   "employees": [
     {
       "employee_id": "EMP001",
-      "name": "Alice Chen",
+      "name": "Aryan Sharma",
       "department": "Engineering",
       "summary": "Alice shows consistent technical growth with scores rising from 70 to 88 over six months, though her communication and leadership competencies have stagnated around 65-72 and 55-62 respectively. She would benefit from targeted communication coaching and stretch leadership assignments to round out her profile.",
       "recommendations": [
@@ -12,17 +12,17 @@
         "Schedule monthly 1:1 check-ins with her manager to track progress on collaboration, which currently has insufficient evidence for reliable trend assessment."
       ],
       "evidence_ids": [
-        "manager_q2",
-        "peer_360",
-        "manager_q1"
+        "PROJ-001-02",
+        "CERT-SCRUM-MASTER-001",
+        "mgr_01_emp001"
       ],
       "generation_source": "fallback",
       "model": null
     },
     {
       "employee_id": "EMP002",
-      "name": "Bob Martinez",
-      "department": "Sales",
+      "name": "Priya Nair",
+      "department": "Engineering",
       "summary": "Bob's communication skills are a clear strength (80\u219290, stagnant but high), while his technical competency is declining steadily (58\u219245 over 6 months). Immediate intervention is needed to arrest the technical decline before it affects his overall performance rating.",
       "recommendations": [
         "Pair Bob with a technical mentor or assign targeted e-learning modules to address his declining technical score (58\u219245).",
@@ -30,17 +30,17 @@
         "Increase the frequency of evidence collection for leadership and collaboration (currently insufficient) \u2014 add a quarterly project-based assessment."
       ],
       "evidence_ids": [
-        "manager_q2",
-        "proj_gamma",
-        "peer_360"
+        "KPI-COL-Q2",
+        "PROJ-002-05",
+        "PROJ-002-08"
       ],
       "generation_source": "fallback",
       "model": null
     },
     {
       "employee_id": "EMP003",
-      "name": "Carol Singh",
-      "department": "Marketing",
+      "name": "Rohan Mehta",
+      "department": "Product",
       "summary": "Carol is a strong collaborator and communicator, with scores in the high 70s\u2013low 80s for both. Her technical competency is flat at 65 and leadership is underdeveloped at 50\u201353. Several competencies lack enough evidence for reliable assessment.",
       "recommendations": [
         "Create a leadership development plan for Carol \u2014 her leadership score (50\u201353) is the lowest across her profile with only 2 data points.",
@@ -48,16 +48,16 @@
         "Introduce quarterly 360-degree reviews to increase evidence density for collaboration and adaptability."
       ],
       "evidence_ids": [
-        "manager_q2",
-        "peer_360",
-        "manager_q1"
+        "CERT-SCRUM-MASTER-003",
+        "mgr_08_emp003",
+        "KPI-COL-Q2"
       ],
       "generation_source": "fallback",
       "model": null
     },
     {
       "employee_id": "EMP004",
-      "name": "David Okonkwo",
+      "name": "Kavya Reddy",
       "department": "Engineering",
       "summary": "David is a top technical performer (88\u219295) and strong collaborator, but his leadership scores are trending slightly downward (65\u219261) and communication data is sparse. His technical excellence is an asset but leadership development is becoming urgent.",
       "recommendations": [
@@ -66,9 +66,269 @@
         "Consider David for a senior technical role that includes team leadership responsibilities to build both leadership and communication evidence organically."
       ],
       "evidence_ids": [
-        "manager_q2",
-        "peer_360",
-        "manager_q1"
+        "mgr_02_emp004",
+        "mgr_01_emp004",
+        "peer360_2026-01"
+      ],
+      "generation_source": "fallback",
+      "model": null
+    },
+    {
+      "employee_id": "EMP005",
+      "name": "Aditya Kulkarni",
+      "department": "Engineering",
+      "summary": "Eva is the strongest all-round performer in the cohort, with excellent communication (88\u201395) and leadership (78\u201387) scores both trending positively. Her technical competency is low (55\u201360) but improving, and collaboration scores are high. A high-potential employee.",
+      "recommendations": [
+        "Invest in Eva's technical development with targeted training \u2014 her score (55\u201360) is below average for the cohort despite slow improvement.",
+        "Consider Eva for a team lead or people-manager role \u2014 her leadership trajectory (78\u219287) and communication strength make her well-suited.",
+        "Increase adaptability evidence collection \u2014 only 2 data points currently, which limits trend confidence."
+      ],
+      "evidence_ids": [
+        "PROJ-005-05",
+        "PROJ-005-08",
+        "KPI-COL-Q2"
+      ],
+      "generation_source": "fallback",
+      "model": null
+    },
+    {
+      "employee_id": "EMP006",
+      "name": "Sneha Iyer",
+      "department": "Marketing",
+      "summary": "Frank shows steady improvement across technical (62\u219270), communication (74\u219280), and leadership (60\u219270) competencies \u2014 all trending positively with stagnant classification due to small per-step deltas. He is a consistently improving employee who needs more evidence collected to confirm the upward trajectory.",
+      "recommendations": [
+        "Recognise Frank's consistent improvement across all three main competencies and set stretch targets for 2026 H2 to accelerate growth.",
+        "Increase evidence density for collaboration and adaptability \u2014 currently insufficient for trend assessment.",
+        "Pair Frank with a senior Sales mentor to accelerate his leadership development, which shows the most room for growth (60\u219270)."
+      ],
+      "evidence_ids": [
+        "CERT-GCP-DE-006",
+        "KPI-COL-Q2",
+        "mgr_01_emp006"
+      ],
+      "generation_source": "fallback",
+      "model": null
+    },
+    {
+      "employee_id": "EMP007",
+      "name": "Vikram Joshi",
+      "department": "Sales",
+      "summary": "Vikram Joshi shows active longitudinal performance records. Deterministic guidance generated from verifiable competency trajectory.",
+      "recommendations": [
+        "Assign stretch deliverables to sustain accelerating momentum in: collaboration."
+      ],
+      "evidence_ids": [
+        "mgr_09_emp007",
+        "CERT-AZURE-104-007",
+        "mgr_08_emp007"
+      ],
+      "generation_source": "fallback",
+      "model": null
+    },
+    {
+      "employee_id": "EMP008",
+      "name": "Ananya Krishnan",
+      "department": "Design",
+      "summary": "Ananya Krishnan shows active longitudinal performance records. Deterministic guidance generated from verifiable competency trajectory.",
+      "recommendations": [
+        "Initiate structured performance review for declining competencies: technical_depth."
+      ],
+      "evidence_ids": [
+        "mgr_06_emp008",
+        "PROJ-008-02",
+        "mgr_03_emp008"
+      ],
+      "generation_source": "fallback",
+      "model": null
+    },
+    {
+      "employee_id": "EMP009",
+      "name": "Rahul Gupta",
+      "department": "Engineering",
+      "summary": "Rahul Gupta shows active longitudinal performance records. Deterministic guidance generated from verifiable competency trajectory.",
+      "recommendations": [
+        "Sustain current development cadence and collect quarterly 360 peer feedback."
+      ],
+      "evidence_ids": [
+        "KPI-COL-Q2",
+        "mgr_07_emp009",
+        "PROJ-009-08"
+      ],
+      "generation_source": "fallback",
+      "model": null
+    },
+    {
+      "employee_id": "EMP010",
+      "name": "Nisha Patel",
+      "department": "Human Resources",
+      "summary": "Nisha Patel shows active longitudinal performance records. Deterministic guidance generated from verifiable competency trajectory.",
+      "recommendations": [
+        "Initiate structured performance review for declining competencies: leadership."
+      ],
+      "evidence_ids": [
+        "KPI-COL-Q2",
+        "PROJ-010-02",
+        "CERT-CSPO-010"
+      ],
+      "generation_source": "fallback",
+      "model": null
+    },
+    {
+      "employee_id": "EMP011",
+      "name": "Siddharth Rao",
+      "department": "Engineering",
+      "summary": "Siddharth Rao shows active longitudinal performance records. Deterministic guidance generated from verifiable competency trajectory.",
+      "recommendations": [
+        "Assign stretch deliverables to sustain accelerating momentum in: leadership."
+      ],
+      "evidence_ids": [
+        "PROJ-011-05",
+        "KPI-COL-Q2",
+        "CERT-PMP-011"
+      ],
+      "generation_source": "fallback",
+      "model": null
+    },
+    {
+      "employee_id": "EMP012",
+      "name": "Meera Bhatt",
+      "department": "Product",
+      "summary": "Meera Bhatt shows active longitudinal performance records. Deterministic guidance generated from verifiable competency trajectory.",
+      "recommendations": [
+        "Sustain current development cadence and collect quarterly 360 peer feedback."
+      ],
+      "evidence_ids": [
+        "PROJ-012-02",
+        "mgr_02_emp012",
+        "mgr_08_emp012"
+      ],
+      "generation_source": "fallback",
+      "model": null
+    },
+    {
+      "employee_id": "EMP013",
+      "name": "Karan Verma",
+      "department": "Sales",
+      "summary": "Karan Verma shows active longitudinal performance records. Deterministic guidance generated from verifiable competency trajectory.",
+      "recommendations": [
+        "Initiate structured performance review for declining competencies: communication, leadership, ownership."
+      ],
+      "evidence_ids": [
+        "KPI-COL-Q2",
+        "PROJ-013-08",
+        "mgr_03_emp013"
+      ],
+      "generation_source": "fallback",
+      "model": null
+    },
+    {
+      "employee_id": "EMP014",
+      "name": "Divya Shankar",
+      "department": "AI & Data",
+      "summary": "Divya Shankar shows active longitudinal performance records. Deterministic guidance generated from verifiable competency trajectory.",
+      "recommendations": [
+        "Sustain current development cadence and collect quarterly 360 peer feedback."
+      ],
+      "evidence_ids": [
+        "KPI-COL-Q2",
+        "mgr_05_emp014",
+        "PROJ-014-02"
+      ],
+      "generation_source": "fallback",
+      "model": null
+    },
+    {
+      "employee_id": "EMP015",
+      "name": "Ravi Pillai",
+      "department": "Operations",
+      "summary": "Ravi Pillai shows active longitudinal performance records. Deterministic guidance generated from verifiable competency trajectory.",
+      "recommendations": [
+        "Sustain current development cadence and collect quarterly 360 peer feedback."
+      ],
+      "evidence_ids": [
+        "mgr_03_emp015",
+        "KPI-COL-Q2",
+        "CERT-AZURE-104-015"
+      ],
+      "generation_source": "fallback",
+      "model": null
+    },
+    {
+      "employee_id": "EMP016",
+      "name": "Pooja Malhotra",
+      "department": "Engineering",
+      "summary": "Pooja Malhotra shows active longitudinal performance records. Deterministic guidance generated from verifiable competency trajectory.",
+      "recommendations": [
+        "Sustain current development cadence and collect quarterly 360 peer feedback."
+      ],
+      "evidence_ids": [
+        "CERT-SCRUM-MASTER-016",
+        "CERT-AZURE-104-016",
+        "KPI-COL-Q2"
+      ],
+      "generation_source": "fallback",
+      "model": null
+    },
+    {
+      "employee_id": "EMP017",
+      "name": "Akash Bansal",
+      "department": "Finance",
+      "summary": "Akash Bansal shows active longitudinal performance records. Deterministic guidance generated from verifiable competency trajectory.",
+      "recommendations": [
+        "Sustain current development cadence and collect quarterly 360 peer feedback."
+      ],
+      "evidence_ids": [
+        "mgr_01_emp017",
+        "mgr_02_emp017",
+        "PROJ-017-02"
+      ],
+      "generation_source": "fallback",
+      "model": null
+    },
+    {
+      "employee_id": "EMP018",
+      "name": "Shreya Desai",
+      "department": "Engineering",
+      "summary": "Shreya Desai shows active longitudinal performance records. Deterministic guidance generated from verifiable competency trajectory.",
+      "recommendations": [
+        "Sustain current development cadence and collect quarterly 360 peer feedback."
+      ],
+      "evidence_ids": [
+        "mgr_09_emp018",
+        "mgr_06_emp018",
+        "mgr_04_emp018"
+      ],
+      "generation_source": "fallback",
+      "model": null
+    },
+    {
+      "employee_id": "EMP019",
+      "name": "Nikhil Chandra",
+      "department": "Engineering",
+      "summary": "Nikhil Chandra shows active longitudinal performance records. Deterministic guidance generated from verifiable competency trajectory.",
+      "recommendations": [
+        "Initiate structured performance review for declining competencies: communication, ownership."
+      ],
+      "evidence_ids": [
+        "CERT-GCP-DE-019",
+        "mgr_01_emp019",
+        "KPI-COL-Q2"
+      ],
+      "generation_source": "fallback",
+      "model": null
+    },
+    {
+      "employee_id": "EMP020",
+      "name": "Tanvi Agarwal",
+      "department": "Product",
+      "summary": "Tanvi Agarwal shows active longitudinal performance records. Deterministic guidance generated from verifiable competency trajectory.",
+      "recommendations": [
+        "Sustain current development cadence and collect quarterly 360 peer feedback."
+      ],
+      "evidence_ids": [
+        "mgr_02_emp020",
+        "KPI-COL-Q2",
+        "mgr_04_emp020"
       ],
       "generation_source": "fallback",
       "model": null
