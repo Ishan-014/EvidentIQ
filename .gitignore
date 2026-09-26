@@ -1,2 +1,27 @@
+# Dependencies & Package Managers
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Python artifacts
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+.pytest_cache/
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+
+# IDE & OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
