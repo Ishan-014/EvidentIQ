@@ -323,5 +323,59 @@ class TestLoadScoredData(unittest.TestCase):
             load_scored_data("/nonexistent/path.json")
 
 
+class TestEdgeCasesAndEvidenceThresholds(unittest.TestCase):
+    def test_insufficient_cycles_always_insufficient(self):
+        """Single cycle cannot establish a trend."""
+        single_entry = [{"month": "2026-01", "score": 85, "evidence": [{"source": "mgr_1"}, {"source": "mgr_2"}]}]
+        res = assess_competency("leadership", single_entry)
+        self.assertEqual(res["trend"], "insufficient_evidence")
+        self.assertTrue(res["insufficient_evidence"])
+        self.assertIsNone(res["delta"])
+
+    def test_low_evidence_count_forces_insufficient(self):
+        """Even with 2 cycles, 1 total evidence point is below MIN_EVIDENCE_FOR_TREND."""
+        entries = [
+            {"month": "2026-01", "score": 70, "evidence": [{"source": "mgr_1"}]},
+            {"month": "2026-02", "score": 85, "evidence": []},
+        ]
+        res = assess_competency("ownership", entries)
+        self.assertEqual(res["trend"], "insufficient_evidence")
+        self.assertTrue(res["insufficient_evidence"])
+
+    def test_unordered_cycles_sorted_chronologically(self):
+        """Cycles out of order must be sorted before evaluating deltas."""
+        unordered = [
+            {"month": "2026-03", "score": 88, "evidence": [{"source": "mgr_3"}, {"source": "peer_3"}]},
+            {"month": "2026-01", "score": 60, "evidence": [{"source": "mgr_1"}, {"source": "peer_1"}]},
+            {"month": "2026-02", "score": 74, "evidence": [{"source": "mgr_2"}]},
+        ]
+        res = assess_competency("technical_depth", unordered)
+        self.assertEqual(res["trend"], "improving")
+        self.assertEqual(res["delta"], 28)
+        self.assertEqual([c["cycle"] for c in res["cycles"]], ["2026-01", "2026-02", "2026-03"])
+
+    def test_stagnant_boundary_condition(self):
+        """Score difference within STAGNANT_THRESHOLD (+-5) should classify as stagnant."""
+        entries = [
+            {"month": "2026-01", "score": 70, "evidence": [{"source": "mgr_1"}, {"source": "peer_1"}]},
+            {"month": "2026-02", "score": 74, "evidence": [{"source": "mgr_2"}, {"source": "proj_1"}]},
+        ]
+        res = assess_competency("collaboration", entries)
+        self.assertEqual(res["trend"], "stagnant")
+        self.assertEqual(res["delta"], 4)
+        self.assertFalse(res["insufficient_evidence"])
+
+    def test_declining_boundary_condition(self):
+        """Score drop exceeding STAGNANT_THRESHOLD should classify as declining."""
+        entries = [
+            {"month": "2026-01", "score": 80, "evidence": [{"source": "mgr_1"}, {"source": "peer_1"}]},
+            {"month": "2026-02", "score": 72, "evidence": [{"source": "mgr_2"}, {"source": "proj_1"}]},
+        ]
+        res = assess_competency("communication", entries)
+        self.assertEqual(res["trend"], "declining")
+        self.assertEqual(res["delta"], -8)
+        self.assertFalse(res["insufficient_evidence"])
+
+
 if __name__ == "__main__":
     unittest.main()
