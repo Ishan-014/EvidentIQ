@@ -167,10 +167,14 @@ def assess_competency(
     num_cycles = len(sorted_scores)
 
     confidence = _compute_confidence(total_evidence, unique_sources, num_cycles, threshold)
-    trend = classify_trend(previous, latest, confidence, threshold)
-
-    # Determine if we have insufficient evidence
-    insufficient = trend == "insufficient_evidence" or total_evidence < MIN_EVIDENCE_FOR_TREND
+    
+    # Enforce evidence threshold before trend classification
+    if total_evidence < MIN_EVIDENCE_FOR_TREND or confidence < threshold or num_cycles < 2:
+        trend = "insufficient_evidence"
+        insufficient = True
+    else:
+        trend = classify_trend(previous, latest, confidence, threshold)
+        insufficient = (trend == "insufficient_evidence")
 
     return {
         "competency": competency_name,
