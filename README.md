@@ -37,7 +37,7 @@ The system deterministically evaluates:
                      ▼
        ┌───────────────────────────┐
        │         MODULE 3          │
-       │    AI Recommendation      │ (OpenRouter / Claude + Fallback)
+       │    AI Recommendation      │ (OpenAI API + Fallback)
        └─────────────┬─────────────┘
                      │ recommendations.json
                      ▼
@@ -57,7 +57,7 @@ The system deterministically evaluates:
 
 - **Frontend**: React 19, Vite, Tailwind CSS v4, Lucide React, Spline 3D Runtime (`@splinetool/runtime`).
 - **Backend Pipeline**: Python 3.10+, deterministic JSON data processing, mathematical confidence scoring.
-- **AI & LLM**: Claude via OpenRouter API with structured JSON output enforcement and transparent fallback.
+- **AI & LLM**: OpenAI API (configurable model) with structured JSON output enforcement and deterministic fallback.
 - **Testing**: Python `unittest` suite (Scoring, Trajectory Engine, AI Validation & Fallback).
 
 ---
