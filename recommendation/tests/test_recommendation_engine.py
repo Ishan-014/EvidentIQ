@@ -9,6 +9,7 @@ from recommendation.recommendation_engine import (
     _get_fallback_for_employee,
     _call_openai,
     generate_recommendation,
+    generate_what_if_analysis,
 )
 
 
@@ -130,6 +131,55 @@ class TestFallbackAndFailureHandling(unittest.TestCase):
             self.assertEqual(result["generation_source"], "fallback")
             self.assertIsNone(result["model"])
             self.assertGreater(len(result["recommendations"]), 0)
+
+    @patch("recommendation.recommendation_engine._call_openai", return_value='{"summary":"The added project evidence strengthens this trajectory.","recommendations":[{"text":"Continue the project work.","evidence_ids":["PROJ-001","SCENARIO-001","FAKE-001"]}]}')
+    def test_what_if_analysis_cites_only_actual_evidence(self, mock_call):
+        employee = {
+            "employee_id": "EMP001",
+            "name": "Aryan Sharma",
+            "department": "Engineering",
+            "competencies": [{
+                "competency": "technical_depth",
+                "evidence_used": ["PROJ-001"],
+                "cycles": [],
+            }],
+        }
+
+        result = generate_what_if_analysis(
+            employee,
+            "technical_depth",
+            {"latest_score": 70},
+            {"latest_score": 82},
+            [{"id": "SCENARIO-001", "value": 95}],
+        )
+
+        self.assertEqual(result["generation_source"], "ai")
+        self.assertEqual(result["evidence_ids"], ["PROJ-001"])
+        self.assertIn("SCENARIO-001", mock_call.call_args.args[1])
+
+    @patch("recommendation.recommendation_engine._call_openai", return_value='{"summary":{"unexpected":"shape"},"recommendations":[{"text":{"unexpected":"shape"}},{"text":"Continue the project work."}]}')
+    def test_what_if_analysis_normalizes_unexpected_model_field_types(self, mock_call):
+        employee = {
+            "employee_id": "EMP001",
+            "name": "Aryan Sharma",
+            "department": "Engineering",
+            "competencies": [{"competency": "technical_depth", "evidence_used": [], "cycles": []}],
+        }
+
+        result = generate_what_if_analysis(
+            employee,
+            "technical_depth",
+            {},
+            {},
+            [],
+        )
+
+        self.assertEqual(result["summary"], "Evidence-grounded scenario coaching.")
+        self.assertEqual(result["recommendations"], ["Continue the project work."])
+
+    @patch("recommendation.recommendation_engine._call_openai", return_value=None)
+    def test_what_if_analysis_returns_none_when_openai_unavailable(self, mock_call):
+        self.assertIsNone(generate_what_if_analysis({}, "technical_depth", {}, {}, []))
 
 
 if __name__ == "__main__":
