@@ -103,6 +103,13 @@ class TestOpenAIClient(unittest.TestCase):
         self.assertEqual(body["model"], "gpt-4o-mini")
         self.assertEqual(body["response_format"], {"type": "json_object"})
 
+
+    @patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"})
+    @patch("recommendation.recommendation_engine.urllib.request.urlopen", side_effect=OSError("connection reset"))
+    def test_network_error_returns_none_for_fallback(self, mock_urlopen):
+        self.assertIsNone(_call_openai("system", "user"))
+
+
     @patch.dict("os.environ", {}, clear=True)
     def test_returns_none_without_api_key(self):
         self.assertIsNone(_call_openai("system", "user"))
