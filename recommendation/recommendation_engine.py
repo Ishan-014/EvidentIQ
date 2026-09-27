@@ -1,18 +1,15 @@
-"""Recommendation engine: generates AI coaching recommendations from trajectory data.
+"""Recommendation engine: generates evidence-grounded coaching recommendations.
 
-Supports OpenRouter / Anthropic Claude API with strict structured JSON output validation,
-evidence ID verification against ground truth source evidence, and robust deterministic fallback.
-
-Usage:
-    python recommendation/recommendation_engine.py
+Uses the OpenAI Chat Completions API with strict JSON parsing, evidence-ID
+validation against source data, and deterministic fallback when the API is
+unavailable or returns unusable output.
 
 Environment variables:
-    OPENROUTER_API_KEY  - OpenRouter API key (recommended)
-    OPENROUTER_BASE_URL - Base URL (default: https://openrouter.ai/api/v1)
-    ANTHROPIC_API_KEY   - Direct Anthropic API key (alternative)
-    AI_MODEL            - Model identifier (default: anthropic/claude-3.5-sonnet or claude-3-5-sonnet-20241022)
-    TRAJECTORY_INPUT    - Path to trajectory_output.json
-    RECOMMENDATION_OUT  - Path to write recommendations.json
+    OPENAI_API_KEY  - OpenAI API key
+    OPENAI_BASE_URL - API base URL (default: https://api.openai.com/v1)
+    OPENAI_MODEL    - Model identifier (default: gpt-4o-mini)
+    TRAJECTORY_INPUT - Path to trajectory_output.json
+    RECOMMENDATION_OUT - Path to write recommendations.json
 """
 
 import json
@@ -25,8 +22,8 @@ from typing import Dict, List, Any, Optional, Set, Tuple
 
 TRAJECTORY_INPUT = os.environ.get("TRAJECTORY_INPUT", "trajectory/trajectory_output.json")
 RECOMMENDATION_OUT = os.environ.get("RECOMMENDATION_OUT", "recommendation/recommendations.json")
-OPENROUTER_BASE_URL = os.environ.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
-DEFAULT_MODEL = os.environ.get("AI_MODEL", "anthropic/claude-3.5-sonnet")
+OPENAI_BASE_URL = os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1")
+DEFAULT_MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
 MAX_TOKENS = 1000
 TIMEOUT_SECONDS = 20
 
@@ -110,60 +107,40 @@ def build_user_prompt(employee: dict) -> str:
     return user_text
 
 
-def _call_openrouter_or_anthropic(system_prompt: str, user_prompt: str) -> Optional[str]:
-    """Call OpenRouter or Anthropic API via standardized HTTP client."""
-    openrouter_key = os.environ.get("OPENROUTER_API_KEY", "")
-    anthropic_key = os.environ.get("ANTHROPIC_API_KEY", "")
+def _call_openai(system_prompt: str, user_prompt: str) -> Optional[str]:
+    """Call OpenAI's Chat Completions API; return None on API/configuration failure."""
+    api_key = os.environ.get("OPENAI_API_KEY", "").strip()
+    if not api_key:
+        return None
 
-    # 1. OpenRouter (primary standardized path)
-    if openrouter_key:
-        try:
-            url = f"{OPENROUTER_BASE_URL.rstrip('/')}/chat/completions"
-            payload = {
-                "model": DEFAULT_MODEL,
-                "messages": [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
-                ],
-                "temperature": 0.2,
-                "max_tokens": MAX_TOKENS,
-                "response_format": {"type": "json_object"}
-            }
-            req = urllib.request.Request(
-                url,
-                data=json.dumps(payload).encode("utf-8"),
-                headers={
-                    "Authorization": f"Bearer {openrouter_key}",
-                    "Content-Type": "application/json",
-                    "HTTP-Referer": "https://github.com/Ishan-014/EvidentIQ",
-                    "X-Title": "EvidentIQ Talent Intelligence",
-                    "User-Agent": "EvidentIQ/2.4"
-                },
-                method="POST"
-            )
-            with urllib.request.urlopen(req, timeout=TIMEOUT_SECONDS) as response:
-                res_data = json.loads(response.read().decode("utf-8"))
-                return res_data["choices"][0]["message"]["content"]
-        except Exception as e:
-            # Fall through gracefully on timeout or network error
-            pass
-
-    # 2. Anthropic Direct SDK (if configured)
-    if anthropic_key:
-        try:
-            import anthropic  # type: ignore
-            client = anthropic.Anthropic(api_key=anthropic_key)
-            message = client.messages.create(
-                model=os.environ.get("ANTHROPIC_MODEL", "claude-3-5-sonnet-20241022"),
-                max_tokens=MAX_TOKENS,
-                system=system_prompt,
-                messages=[{"role": "user", "content": user_prompt}],
-            )
-            return message.content[0].text
-        except Exception:
-            pass
-
-    return None
+    try:
+        url = f"{OPENAI_BASE_URL.rstrip('/')}/chat/completions"
+        payload = {
+            "model": DEFAULT_MODEL,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            "temperature": 0.2,
+            "max_tokens": MAX_TOKENS,
+            "response_format": {"type": "json_object"},
+        }
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+                "User-Agent": "EvidentIQ/1.0",
+            },
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=TIMEOUT_SECONDS) as response:
+            res_data = json.loads(response.read().decode("utf-8"))
+        return res_data["choices"][0]["message"]["content"]
+    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, KeyError, IndexError, TypeError, ValueError):
+        # API failures must not interrupt the deterministic recommendation pipeline.
+        return None
 
 
 def _clean_json_text(text: str) -> str:
@@ -286,7 +263,7 @@ def generate_recommendation(employee: dict, system_prompt: str, fallback_data: d
     """Generate structured, evidence-validated recommendation for one employee."""
     valid_evidence_pool = extract_all_valid_evidence_ids(employee)
     user_prompt = build_user_prompt(employee)
-    llm_text = _call_openrouter_or_anthropic(system_prompt, user_prompt)
+    llm_text = _call_openai(system_prompt, user_prompt)
 
     if llm_text:
         summary, recommendations, validated_evidence_ids = parse_structured_recommendation(llm_text, valid_evidence_pool)
