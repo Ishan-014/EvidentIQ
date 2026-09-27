@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   X,
   ShieldCheck,
@@ -18,14 +18,19 @@ import {
   ArrowRight,
   Info
 } from 'lucide-react';
-import { trajectoryData, recommendationsData } from '../data/mockEmployees';
+import { analyzeWhatIf, fetchDashboard } from '../services/dashboardApi';
 
-export default function WorkspaceModal({ isOpen, onClose, initialEmployeeId = 'EMP001', initialTab = 'overview' }) {
-  if (!isOpen) return null;
+
+
+function WorkspaceModalContent({ trajectoryData, recommendationsData, onClose, initialEmployeeId, initialTab }) {
 
   const [selectedEmpId, setSelectedEmpId] = useState(initialEmployeeId);
   const [activeTab, setActiveTab] = useState(initialTab); // 'overview' | 'ai-coach' | 'what-if'
   const [expandedCompetency, setExpandedCompetency] = useState(null);
+  const [scenarioAnalysis, setScenarioAnalysis] = useState(null);
+  const [scenarioAnalysisSignature, setScenarioAnalysisSignature] = useState('');
+  const [scenarioAnalysisError, setScenarioAnalysisError] = useState('');
+  const [isAnalyzingScenario, setIsAnalyzingScenario] = useState(false);
 
   const currentEmployee = trajectoryData.employees.find(e => e.employee_id === selectedEmpId) || trajectoryData.employees[0];
   const currentRec = recommendationsData.employees.find(e => e.employee_id === selectedEmpId) || recommendationsData.employees[0];
@@ -110,7 +115,49 @@ export default function WorkspaceModal({ isOpen, onClose, initialEmployeeId = 'E
     };
   };
 
-  const simResult = computeSimulatedOutcome();
+  const scenarioSignature = JSON.stringify([selectedEmpId, simSelectedComp, injectedSignals]);
+  const currentScenarioAnalysis = scenarioAnalysisSignature === scenarioSignature &&
+    Array.isArray(scenarioAnalysis?.analysis?.recommendations) &&
+    Array.isArray(scenarioAnalysis?.analysis?.evidence_ids) &&
+    scenarioAnalysis?.scenario
+    ? scenarioAnalysis
+    : null;
+  const simResult = currentScenarioAnalysis ? {
+    trend: currentScenarioAnalysis.scenario.trend,
+    latestSimScore: currentScenarioAnalysis.scenario.latest_score,
+    confidence: currentScenarioAnalysis.scenario.confidence,
+    totalEvidence: currentScenarioAnalysis.scenario.evidence_count,
+    delta: currentScenarioAnalysis.scenario.delta || 0,
+  } : computeSimulatedOutcome();
+
+  const handleAnalyzeScenario = async () => {
+    setIsAnalyzingScenario(true);
+    setScenarioAnalysisError('');
+    setScenarioAnalysis(null);
+    setScenarioAnalysisSignature('');
+
+    try {
+      const result = await analyzeWhatIf({
+        employee_id: currentEmployee.employee_id,
+        competency: simSelectedComp,
+        signals: injectedSignals,
+      });
+      if (
+        !result?.scenario ||
+        typeof result.analysis?.summary !== 'string' ||
+        !Array.isArray(result.analysis.recommendations) ||
+        !Array.isArray(result.analysis.evidence_ids)
+      ) {
+        throw new Error('The server returned an invalid scenario analysis response. Check the backend logs and retry.');
+      }
+      setScenarioAnalysis(result);
+      setScenarioAnalysisSignature(scenarioSignature);
+    } catch (error) {
+      setScenarioAnalysisError(error.message || 'Failed to analyze the scenario.');
+    } finally {
+      setIsAnalyzingScenario(false);
+    }
+  };
 
   const handleAddSignal = (signal) => {
     setInjectedSignals([...injectedSignals, signal]);
@@ -142,7 +189,7 @@ export default function WorkspaceModal({ isOpen, onClose, initialEmployeeId = 'E
                   PIPELINE VERIFIED v2.4
                 </span>
               </div>
-              <p className="text-xs text-neutral-400">Deterministic longitudinal evaluation & OpenRouter / Claude coaching</p>
+              <p className="text-xs text-neutral-400">Deterministic longitudinal evaluation & AI coaching</p>
             </div>
           </div>
 
@@ -243,7 +290,7 @@ export default function WorkspaceModal({ isOpen, onClose, initialEmployeeId = 'E
               </div>
               <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200 text-center">
                 <span className="text-[10px] text-neutral-400 block uppercase">AI Model</span>
-                <span className="font-bold text-indigo-700">OpenRouter / Claude</span>
+                <span className="font-bold text-indigo-700">AI-assisted</span>
               </div>
             </div>
           </div>
@@ -416,7 +463,7 @@ export default function WorkspaceModal({ isOpen, onClose, initialEmployeeId = 'E
                     <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${
                       currentRec.generation_source === 'ai' ? 'bg-indigo-100 text-indigo-700' : 'bg-neutral-100 text-neutral-700'
                     }`}>
-                      {currentRec.generation_source === 'ai' ? 'Claude via OpenRouter' : 'Deterministic Fallback Active'}
+                      {currentRec.generation_source === 'ai' ? 'AI-generated' : 'Deterministic Fallback Active'}
                     </span>
                   </div>
                 </div>
@@ -435,7 +482,7 @@ export default function WorkspaceModal({ isOpen, onClose, initialEmployeeId = 'E
                       <div className="w-5 h-5 rounded-full bg-indigo-50 text-indigo-700 font-bold flex items-center justify-center shrink-0 text-xs mt-0.5">
                         {i + 1}
                       </div>
-                      <p className="leading-relaxed">{rec}</p>
+                      <p className="leading-relaxed">{typeof rec === 'string' ? rec : rec?.text || rec?.recommendation || ''}</p>
                     </div>
                   ))}
                 </div>
@@ -472,13 +519,23 @@ export default function WorkspaceModal({ isOpen, onClose, initialEmployeeId = 'E
                     <h4 className="font-bold text-neutral-900 text-base">What-If Evidence Injection Simulator</h4>
                     <p className="text-xs text-neutral-500">Inject hypothetical evidence deliverables to observe deterministic re-calculation of trajectory & confidence.</p>
                   </div>
-                  <button
-                    onClick={handleResetSignals}
-                    className="px-3 py-1.5 rounded-lg border border-neutral-200 text-neutral-600 hover:bg-neutral-50 text-xs font-medium flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <RefreshCw className="w-3 h-3" />
-                    <span>Clear Injected Signals</span>
-                  </button>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                      onClick={handleResetSignals}
+                      className="px-3 py-1.5 rounded-lg border border-neutral-200 text-neutral-600 hover:bg-neutral-50 text-xs font-medium flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      <span>Clear Injected Signals</span>
+                    </button>
+                    <button
+                      onClick={handleAnalyzeScenario}
+                      disabled={isAnalyzingScenario || injectedSignals.length === 0}
+                      className="px-3 py-1.5 rounded-lg bg-neutral-900 text-white hover:bg-black disabled:opacity-50 text-xs font-medium flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Sparkles className="w-3 h-3" />
+                      <span>{isAnalyzingScenario ? 'Analyzing...' : 'Analyze Scenario'}</span>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Target Competency Selector */}
@@ -534,7 +591,9 @@ export default function WorkspaceModal({ isOpen, onClose, initialEmployeeId = 'E
                   {/* AFTER CARD */}
                   <div className="p-5 rounded-2xl bg-indigo-50/70 border border-indigo-200 space-y-3 shadow-sm">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-mono font-semibold uppercase text-indigo-700">Simulated Trajectory (After)</span>
+                      <span className="text-xs font-mono font-semibold uppercase text-indigo-700">
+                        {currentScenarioAnalysis ? 'Python Pipeline Result (After)' : 'Instant Estimate (After)'}
+                      </span>
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                         simResult.trend === 'improving' ? 'bg-emerald-100 text-emerald-800' :
                         simResult.trend === 'declining' ? 'bg-rose-100 text-rose-800' : 'bg-neutral-200 text-neutral-800'
@@ -562,6 +621,37 @@ export default function WorkspaceModal({ isOpen, onClose, initialEmployeeId = 'E
                     </div>
                   </div>
                 </div>
+
+                {scenarioAnalysisError && (
+                  <div role="alert" className="mb-4 p-3 rounded-xl border border-rose-200 bg-rose-50 text-xs text-rose-800">
+                    {scenarioAnalysisError}
+                  </div>
+                )}
+                {currentScenarioAnalysis && (
+                  <div className="mb-6 p-5 rounded-2xl bg-white border border-neutral-200 shadow-xs">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Sparkles className="w-4 h-4 text-amber-500" />
+                      <h5 className="font-bold text-neutral-900 text-sm">AI Scenario Analysis</h5>
+                    </div>
+                    <p className="text-sm leading-relaxed text-neutral-700 mb-4">{currentScenarioAnalysis.analysis.summary}</p>
+                    <div className="space-y-2">
+                      {currentScenarioAnalysis.analysis.recommendations.map((recommendation, index) => (
+                        <div key={index} className="p-3 rounded-xl bg-neutral-50 border border-neutral-200 text-xs sm:text-sm text-neutral-800">
+                          {recommendation}
+                        </div>
+                      ))}
+                    </div>
+                    {currentScenarioAnalysis.analysis.evidence_ids.length > 0 && (
+                      <div className="mt-3 flex items-center gap-2 flex-wrap text-[10px] text-neutral-500">
+                        <span>Actual evidence cited:</span>
+                        {currentScenarioAnalysis.analysis.evidence_ids.map(id => (
+                          <span key={id} className="px-1.5 py-0.5 rounded bg-neutral-100 border border-neutral-200 font-mono">{id}</span>
+                        ))}
+                      </div>
+                    )}
+                    <p className="mt-3 text-[10px] text-neutral-400">Hypothetical signals are excluded from the employee record.</p>
+                  </div>
+                )}
 
                 {/* Injected Evidence Signals List */}
                 <div className="mb-6">
@@ -666,5 +756,77 @@ export default function WorkspaceModal({ isOpen, onClose, initialEmployeeId = 'E
 
       </div>
     </div>
+  );
+}
+
+export default function WorkspaceModal({ isOpen, onClose, initialEmployeeId = 'EMP001', initialTab = 'overview' }) {
+  const [dashboardData, setDashboardData] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState('');
+  const [retryCount, setRetryCount] = useState(0);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    let cancelled = false;
+    setIsLoading(true);
+    setLoadError('');
+
+    fetchDashboard()
+      .then(data => {
+        if (!data?.trajectoryData?.employees || !data?.recommendationsData?.employees) {
+          throw new Error('Dashboard response is missing required data.');
+        }
+        if (!cancelled) setDashboardData(data);
+      })
+      .catch(error => {
+        if (!cancelled) setLoadError(error.message || 'Failed to load dashboard data');
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, retryCount]);
+
+  if (!isOpen) return null;
+
+  if (isLoading || (!dashboardData && !loadError)) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-md animate-fade-in">
+        <div role="status" className="bg-white rounded-2xl shadow-2xl border border-neutral-200 p-6 flex items-center gap-3 text-sm text-neutral-700">
+          <RefreshCw className="w-4 h-4 animate-spin" />
+          Loading workspace data...
+        </div>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-md animate-fade-in">
+        <div role="alert" className="bg-white rounded-2xl shadow-2xl border border-neutral-200 p-6 max-w-md w-full">
+          <p className="text-sm text-neutral-700 mb-4">Could not load workspace data: {loadError}</p>
+          <div className="flex justify-end gap-2">
+            <button onClick={onClose} className="px-3 py-1.5 rounded-lg border border-neutral-200 text-neutral-600 text-xs font-medium cursor-pointer">Close</button>
+            <button onClick={() => setRetryCount(count => count + 1)} className="px-3 py-1.5 rounded-lg bg-neutral-900 text-white text-xs font-medium flex items-center gap-1.5 cursor-pointer">
+              <RefreshCw className="w-3 h-3" /> Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <WorkspaceModalContent
+      trajectoryData={dashboardData.trajectoryData}
+      recommendationsData={dashboardData.recommendationsData}
+      onClose={onClose}
+      initialEmployeeId={initialEmployeeId}
+      initialTab={initialTab}
+    />
   );
 }

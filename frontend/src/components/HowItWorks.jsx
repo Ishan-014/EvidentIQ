@@ -108,7 +108,7 @@ export default function HowItWorks({ onOpenWorkspace }) {
           <div className="flex items-center justify-between">
             <span className="font-semibold text-neutral-900">AI Coaching Roadmap</span>
             <span className="px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 font-mono text-[9px] font-bold">
-              CLAUDE OPUS
+              AI COACH
             </span>
           </div>
           <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/80 text-neutral-700 leading-snug">

@@ -7,7 +7,9 @@ from recommendation.recommendation_engine import (
     validate_and_filter_evidence_ids,
     parse_structured_recommendation,
     _get_fallback_for_employee,
+    _call_openai,
     generate_recommendation,
+    generate_what_if_analysis,
 )
 
 
@@ -79,6 +81,41 @@ class TestStructuredRecommendationParsing(unittest.TestCase):
         self.assertEqual(ev_ids, ["PROJ-001"])
 
 
+
+class TestOpenAIClient(unittest.TestCase):
+    @patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"})
+    @patch("recommendation.recommendation_engine.urllib.request.urlopen")
+    def test_sends_openai_chat_completion_request(self, mock_urlopen):
+        import json
+
+        response = MagicMock()
+        response.read.return_value = json.dumps({
+            "choices": [{"message": {"content": '{"summary":"ok","recommendations":[]}'}}]
+        }).encode("utf-8")
+        mock_urlopen.return_value.__enter__.return_value = response
+
+        result = _call_openai("system", "user")
+
+        self.assertEqual(result, '{"summary":"ok","recommendations":[]}')
+        request = mock_urlopen.call_args.args[0]
+        self.assertEqual(request.full_url, "https://api.openai.com/v1/chat/completions")
+        self.assertEqual(request.get_header("Authorization"), "Bearer test-key")
+        body = json.loads(request.data.decode("utf-8"))
+        self.assertEqual(body["model"], "gpt-4o-mini")
+        self.assertEqual(body["response_format"], {"type": "json_object"})
+
+
+    @patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"})
+    @patch("recommendation.recommendation_engine.urllib.request.urlopen", side_effect=OSError("connection reset"))
+    def test_network_error_returns_none_for_fallback(self, mock_urlopen):
+        self.assertIsNone(_call_openai("system", "user"))
+
+
+    @patch.dict("os.environ", {}, clear=True)
+    def test_returns_none_without_api_key(self):
+        self.assertIsNone(_call_openai("system", "user"))
+
+
 class TestFallbackAndFailureHandling(unittest.TestCase):
     def test_deterministic_fallback_when_api_missing(self):
         employee = {
@@ -89,11 +126,60 @@ class TestFallbackAndFailureHandling(unittest.TestCase):
                 {"competency": "technical_depth", "trend": "improving", "confidence": 0.85, "evidence_used": ["PROJ-100"]}
             ],
         }
-        with patch("recommendation.recommendation_engine._call_openrouter_or_anthropic", return_value=None):
+        with patch("recommendation.recommendation_engine._call_openai", return_value=None):
             result = generate_recommendation(employee, "sys prompt", {"employees": []})
             self.assertEqual(result["generation_source"], "fallback")
             self.assertIsNone(result["model"])
             self.assertGreater(len(result["recommendations"]), 0)
+
+    @patch("recommendation.recommendation_engine._call_openai", return_value='{"summary":"The added project evidence strengthens this trajectory.","recommendations":[{"text":"Continue the project work.","evidence_ids":["PROJ-001","SCENARIO-001","FAKE-001"]}]}')
+    def test_what_if_analysis_cites_only_actual_evidence(self, mock_call):
+        employee = {
+            "employee_id": "EMP001",
+            "name": "Aryan Sharma",
+            "department": "Engineering",
+            "competencies": [{
+                "competency": "technical_depth",
+                "evidence_used": ["PROJ-001"],
+                "cycles": [],
+            }],
+        }
+
+        result = generate_what_if_analysis(
+            employee,
+            "technical_depth",
+            {"latest_score": 70},
+            {"latest_score": 82},
+            [{"id": "SCENARIO-001", "value": 95}],
+        )
+
+        self.assertEqual(result["generation_source"], "ai")
+        self.assertEqual(result["evidence_ids"], ["PROJ-001"])
+        self.assertIn("SCENARIO-001", mock_call.call_args.args[1])
+
+    @patch("recommendation.recommendation_engine._call_openai", return_value='{"summary":{"unexpected":"shape"},"recommendations":[{"text":{"unexpected":"shape"}},{"text":"Continue the project work."}]}')
+    def test_what_if_analysis_normalizes_unexpected_model_field_types(self, mock_call):
+        employee = {
+            "employee_id": "EMP001",
+            "name": "Aryan Sharma",
+            "department": "Engineering",
+            "competencies": [{"competency": "technical_depth", "evidence_used": [], "cycles": []}],
+        }
+
+        result = generate_what_if_analysis(
+            employee,
+            "technical_depth",
+            {},
+            {},
+            [],
+        )
+
+        self.assertEqual(result["summary"], "Evidence-grounded scenario coaching.")
+        self.assertEqual(result["recommendations"], ["Continue the project work."])
+
+    @patch("recommendation.recommendation_engine._call_openai", return_value=None)
+    def test_what_if_analysis_returns_none_when_openai_unavailable(self, mock_call):
+        self.assertIsNone(generate_what_if_analysis({}, "technical_depth", {}, {}, []))
 
 
 if __name__ == "__main__":
