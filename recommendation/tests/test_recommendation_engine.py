@@ -7,6 +7,7 @@ from recommendation.recommendation_engine import (
     validate_and_filter_evidence_ids,
     parse_structured_recommendation,
     _get_fallback_for_employee,
+    _call_openai,
     generate_recommendation,
 )
 
@@ -77,6 +78,34 @@ class TestStructuredRecommendationParsing(unittest.TestCase):
         valid_pool = {"PROJ-001"}
         _, _, ev_ids = parse_structured_recommendation(llm_json, valid_pool)
         self.assertEqual(ev_ids, ["PROJ-001"])
+
+
+
+class TestOpenAIClient(unittest.TestCase):
+    @patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"})
+    @patch("recommendation.recommendation_engine.urllib.request.urlopen")
+    def test_sends_openai_chat_completion_request(self, mock_urlopen):
+        import json
+
+        response = MagicMock()
+        response.read.return_value = json.dumps({
+            "choices": [{"message": {"content": '{"summary":"ok","recommendations":[]}'}}]
+        }).encode("utf-8")
+        mock_urlopen.return_value.__enter__.return_value = response
+
+        result = _call_openai("system", "user")
+
+        self.assertEqual(result, '{"summary":"ok","recommendations":[]}')
+        request = mock_urlopen.call_args.args[0]
+        self.assertEqual(request.full_url, "https://api.openai.com/v1/chat/completions")
+        self.assertEqual(request.get_header("Authorization"), "Bearer test-key")
+        body = json.loads(request.data.decode("utf-8"))
+        self.assertEqual(body["model"], "gpt-4o-mini")
+        self.assertEqual(body["response_format"], {"type": "json_object"})
+
+    @patch.dict("os.environ", {}, clear=True)
+    def test_returns_none_without_api_key(self):
+        self.assertIsNone(_call_openai("system", "user"))
 
 
 class TestFallbackAndFailureHandling(unittest.TestCase):
