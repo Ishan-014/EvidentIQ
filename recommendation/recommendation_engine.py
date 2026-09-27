@@ -138,7 +138,7 @@ def _call_openai(system_prompt: str, user_prompt: str) -> Optional[str]:
         with urllib.request.urlopen(req, timeout=TIMEOUT_SECONDS) as response:
             res_data = json.loads(response.read().decode("utf-8"))
         return res_data["choices"][0]["message"]["content"]
-    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, KeyError, IndexError, TypeError, ValueError):
+    except (urllib.error.URLError, TimeoutError, OSError, KeyError, IndexError, TypeError, ValueError):
         # API failures must not interrupt the deterministic recommendation pipeline.
         return None
 
