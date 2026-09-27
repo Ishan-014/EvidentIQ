@@ -89,7 +89,7 @@ class TestFallbackAndFailureHandling(unittest.TestCase):
                 {"competency": "technical_depth", "trend": "improving", "confidence": 0.85, "evidence_used": ["PROJ-100"]}
             ],
         }
-        with patch("recommendation.recommendation_engine._call_openrouter_or_anthropic", return_value=None):
+        with patch("recommendation.recommendation_engine._call_openai", return_value=None):
             result = generate_recommendation(employee, "sys prompt", {"employees": []})
             self.assertEqual(result["generation_source"], "fallback")
             self.assertIsNone(result["model"])
